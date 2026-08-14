@@ -7,11 +7,24 @@ var Module = typeof BusytexPipeline != 'undefined' ? BusytexPipeline : {};
 (() => {
   var metadata = {"files":[{"filename":"/texlive/icudt78l.dat","start":0,"end":16795392}],"remote_package_size":16795392};
   var dirOps = [["/","texlive"]];
-  // locateFile 须在脚本求值期解析:此刻 Module = BusytexPipeline(带静态 locateFile,
-  // 按 load_package 注册的 data_packages 把 .js 路径映射到同目录 .data);
-  // runWithFS 运行期拿到的是 Emscripten Module,其上没有 locateFile(官方 loader 同此时序)。
+  // 数据包的绝对 URL:从 BusytexPipeline.data_packages(load_package 注册的 .js 地址)
+  // 里挑出**我们这一包**,把结尾的 .js 换成 .data。
+  //
+  // **刻意不用 BusytexPipeline.locateFile**(2026-08-14 真机实测踩到):上游那个实现是
+  //   data_packages.map(js => js.replace('.js', '.data')).find(f => f.endsWith(name))
+  // —— replace 只换**第一处** '.js',而 CDN 主机名 cdn.jsdelivr.net 里就含 '.js',
+  // URL 会被改成 cdn.datadelivr.net,endsWith 永远匹配不上 → 返回 undefined → 404。
+  // 只要数据包托管在 jsDelivr 上就必然触发,与是否分包无关。
+  // 这里用锚定结尾的正则替换,并按包名精确挑选。
   var REMOTE_PACKAGE_BASE = "texlive-icu.data";
-  var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
+  var REMOTE_PACKAGE_NAME = (function () {
+    var pkgs = (typeof BusytexPipeline != 'undefined' && BusytexPipeline.data_packages) || [];
+    for (var i = 0; i < pkgs.length; i++) {
+      if (String(pkgs[i]).replace(/[?#].*$/, '').endsWith("texlive-icu.js"))
+        return String(pkgs[i]).replace(/\.js(\?[^#]*)?(#.*)?$/, '.data');
+    }
+    return REMOTE_PACKAGE_BASE; // 未注册(如 Node 直驱按相对路径读盘)→ 原样
+  })();
   function runWithFS(Module) {
     for (var i = 0; i < dirOps.length; i++)
       Module['FS_createPath'](dirOps[i][0], dirOps[i][1], true, true);
