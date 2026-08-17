@@ -1,0 +1,108 @@
+%% sb2nov-resume.sty — 上游 sb2nov/resume 的导言区,原样 vendor 进本仓。
+%%
+%% 上游:https://github.com/sb2nov/resume  (⭐6.9k,2026-05 仍在维护)
+%% 作者:Sourabh Bajaj   许可:MIT —— 下面这段版权声明按许可要求原样保留。
+%%
+%%   Resume in LateX
+%%   Author : Sourabh Bajaj
+%%   License : MIT
+%%
+%% cvb 的适配(只做必需的三处,版式一行未动;逐条对应 CLAUDE.md §4 的"上游件三通病"):
+%%   ① \usepackage[empty]{fullpage} → geometry:fullpage 在裁剪包里没有,
+%%      而 geometry 我们本来就带,边距等价;
+%%   ② color[usenames,dvipsnames] → xcolor:前者要 dvipsnam.def,徒增依赖;
+%%   ③ \input{glyphtounicode} 与 \pdfgentounicode 是 **pdfTeX 专属**,
+%%      XeLaTeX 下未定义 —— 注释掉。它们本是给 pdfTeX 出 ATS 可抽取文本用的,
+%%      而 XeTeX 天生输出 Unicode,不需要。
+%%   纸张与字体不在这里定:由生成器按文化圈给(澳新 = A4 + Carlito 11)。
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sb2nov-resume}[2026/08/14 vendored sb2nov/resume preamble (MIT)]
+
+\RequirePackage{geometry}
+\geometry{margin=0.75in}
+\pagestyle{empty}
+\RequirePackage{titlesec}
+\RequirePackage{xcolor}
+\RequirePackage{enumitem}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{fancyhdr}
+\RequirePackage[english]{babel}
+\RequirePackage{tabularx}
+% [cvb] \input{glyphtounicode}:pdfTeX 专属,XeLaTeX 下未定义
+
+\pagestyle{fancy}
+\fancyhf{} % Clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generated PDF is machine readable/ATS parsable
+% [cvb] \pdfgentounicode:pdfTeX 专属
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-2pt}}
+  }
+}
+
+% Just in case someone needs a heading that does not need to be in a list
+\newcommand{\resumeHeading}[4]{
+    \begin{tabular*}{0.99\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small #3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small #3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small #1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeItemPlain}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  CV STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
