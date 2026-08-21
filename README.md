@@ -73,6 +73,48 @@ Action.wrap(document.querySelector('#submit'), {
 The controller exposes `getState()`, `setEnabled()`, `setText()`,
 `reset()`, `trigger()`, `detach()`.
 
+### chips — phrase-array input
+
+An editor for an array of short phrases (skill keywords, tags, course
+names). Words collect into removable pill chips: Enter or any list
+separator (`, ， 、 ; ；`) commits the typed word, pasting `"Java, Go"`
+splits automatically, Backspace in the empty input removes the last chip,
+and a half-typed word is committed on blur — never dropped. Not for
+sentence arrays (they contain commas) — use `string-list` for those.
+
+```js
+const box = Chips.create({
+  value: ['Java', 'Go'],
+  placeholder: 'Enter or comma to add',
+  ariaLabel: 'Keywords',
+  deleteLabel: 'Delete',            // aria-label prefix for each chip's ×
+  onChange: (arr, reason) => save(arr),  // fresh array every time
+});
+form.append(box);
+// box.setValues(arr) — wholesale reset (cancel/rollback); no onChange
+```
+
+### string-list — sentence-array input
+
+An editor for an array of sentences (résumé highlights, bullet points).
+Each item lives in its own auto-growing box with an × button, plus a
+trailing empty draft row: typing converts the draft in place, Enter jumps
+to the next row, multi-line paste splits on newlines, clearing a row and
+leaving removes it. Item boundaries are the boxes — visible to the user,
+never a line-per-item convention inside one textarea.
+
+```js
+const list = StringList.create({
+  value: ['Cut build time from 40 min to 6'],
+  placeholder: 'Add an item; Enter for the next',
+  ariaLabel: 'Highlights',
+  deleteLabel: 'Delete',
+  inputClass: 'my-input',           // app's form-control class for each box
+  onChange: (arr) => save(arr),
+});
+// list.setValues(arr) — wholesale reset; no onChange
+```
+
 ### field — typing-time input validation
 
 Wraps an `<input>` / `<textarea>` for char-level filtering + format
@@ -257,6 +299,7 @@ Modules read CSS custom properties on `:root`. Provide:
 
 - All modules: `--surface`, `--border`, `--text`, `--text-muted`, `--accent`, `--err`
 - `toast`: also `--ok`
+- `chips` / `string-list`: the base set only
 - `spinner`: uses `--border` and `--accent`
 - `footer-brand`: optionally `--footer-color`, `--footer-border`
 
