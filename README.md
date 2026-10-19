@@ -21,6 +21,8 @@ defaults to `main` HEAD, ~12h CDN cache):
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/onegbnet/ccs/overlay/style.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/onegbnet/ccs/toast/style.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/onegbnet/ccs/spinner/style.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/onegbnet/ccs/edge-menu/style.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/onegbnet/ccs/scroll-row/style.min.css">
 
 <script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/i18n-engine/client.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/action/client.min.js"></script>
@@ -30,6 +32,8 @@ defaults to `main` HEAD, ~12h CDN cache):
 <script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/toast/client.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/footer-brand/client.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/theme/client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/edge-menu/client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/onegbnet/ccs/scroll-row/client.min.js"></script>
 ```
 
 `<script>` tags are parser-blocking and run in document order — load
@@ -190,6 +194,90 @@ triggerBtn.addEventListener('click', (e) => {
 You manage markup, positioning, and show/hide; `Popover` only manages
 *when to close*.
 
+### edge-menu — floating menu on a viewport edge
+
+A small menu pinned to the right (or left) edge that takes no layout
+space. It opens upward from a round trigger; after a few seconds without
+page activity the trigger shrinks into a thin handle flush with the edge,
+and any scroll / pointer / touch / key activity brings it back. Built on
+native `<details>`, so it still opens without the script.
+
+```html
+<link rel="stylesheet" href=".../edge-menu/style.min.css">
+
+<details class="edge-menu">                       <!-- data-side="left" | data-align="end" | data-idle="3000" -->
+  <summary aria-label="Menu">
+    <svg class="edge-menu-when-closed">…</svg>    <!-- shown while closed -->
+    <svg class="edge-menu-when-open">…</svg>      <!-- shown while open -->
+  </summary>
+  <div class="edge-menu-items">
+    <a class="edge-menu-item" href="#" data-edge-menu-top aria-label="Back to top">↑</a>
+    <button class="edge-menu-item" id="themeToggle" type="button" aria-label="Toggle theme"></button>
+  </div>
+</details>
+
+<script src=".../theme/client.min.js"></script>
+<script src=".../edge-menu/client.min.js"></script>
+```
+
+- `data-idle` — milliseconds of inactivity before collapsing to the
+  handle (default `3000`, `0` = never). Never collapses while open or
+  while focus is inside.
+- Click outside or `Esc` closes the menu (`Esc` returns focus to the
+  trigger).
+- `data-edge-menu-top` on an item scrolls to the top (instant under
+  `prefers-reduced-motion`) and closes; `data-edge-menu-close` just
+  closes after the item's own click.
+- `theme`'s `#themeToggle` button works as an item unchanged.
+- Optional knobs: `--edge-menu-size`, `--edge-menu-offset`,
+  `--edge-menu-gap`, `--edge-menu-z`.
+
+Menus added after load: `EdgeMenu.attach(detailsEl)`.
+
+Put the `<link>` right before the menu at the end of `<body>`: in-body
+stylesheets only hold back what follows them, so the page's first paint
+doesn't wait on it.
+
+### scroll-row — horizontal scroll row with hover arrows
+
+A row of fixed-width items in a natively scrolling track (proximity snap,
+hidden scrollbar). On devices with hover, prev/next arrows fade in while
+hovering a row that actually overflows; each hides itself at its end.
+Clicking scrolls by 80% of the row width. The wheel is never hijacked, and
+touch devices just swipe (arrows hidden).
+
+```html
+<link rel="stylesheet" href=".../scroll-row/style.min.css">
+
+<div class="scroll-row">
+  <div class="scroll-row-track">
+    <a class="card" href="…">…</a>   <!-- items keep their own width -->
+    …
+  </div>
+  <button type="button" class="scroll-row-arrow scroll-row-prev" aria-label="Scroll left">
+    <span class="scroll-row-badge">‹</span>
+  </button>
+  <button type="button" class="scroll-row-arrow scroll-row-next" aria-label="Scroll right">
+    <span class="scroll-row-badge">›</span>
+  </button>
+</div>
+
+<script src=".../scroll-row/client.min.js"></script>
+```
+
+- `--scroll-row-gap` (default `1rem`) — space between items.
+- `--scroll-row-bleed` (default `0px`) — let the track run past its
+  container by this much on both sides (set it to your page gutter for
+  edge-to-edge swiping on phones); the first item still lines up with the
+  content edge. The track sets `scroll-padding-left` to match — without it
+  Chromium starts an overflowing track already scrolled by its padding.
+- Rows added after load, or after their content changed:
+  `ScrollRow.attach(rowEl).update()`.
+- Left-to-right layouts only.
+
+The stylesheet shapes the page's first paint (the track's layout), so load
+it in `<head>` — or bundle it into your own CSS at build time.
+
 ### toast — bottom-right notifications
 
 Top-down stacked, auto-dismissed.
@@ -301,6 +389,8 @@ Modules read CSS custom properties on `:root`. Provide:
 - `toast`: also `--ok`
 - `chips` / `string-list`: the base set only
 - `spinner`: uses `--border` and `--accent`
+- `edge-menu`: the base set (`--text-muted` colours the idle handle)
+- `scroll-row`: `--surface` (arrow badge and halo) and `--text`
 - `footer-brand`: optionally `--footer-color`, `--footer-border`
 
 ## License
